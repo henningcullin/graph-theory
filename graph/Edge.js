@@ -4,22 +4,36 @@ import { Vertex } from "./Vertex.js";
  * @typedef {'to' | 'from' | 'any'} Direction
  */
 
+/**
+ * Represents an edge between two vertices.
+ */
 export class Edge {
   /**
-   * @param {Vertex} vertex1
-   * @param {Vertex} vertex2
-   * @param {Direction} direction
+   * @param {Vertex} vertex1 - The starting vertex of the edge.
+   * @param {Vertex} vertex2 - The ending vertex of the edge.
+   * @param {Direction} [direction='any'] - The direction of the edge.
    */
   constructor(vertex1, vertex2, direction = "any") {
+    /** @type {Vertex} */
     this.vertex1 = vertex1;
+    /** @type {Vertex} */
     this.vertex2 = vertex2;
-    this.direction = direction; // 'from' means vertex1 -> vertex2, 'to' means vertex2 -> vertex1
+    /** @type {Direction} */
+    this.direction = direction;
   }
 
+  /**
+   * Checks if the edge is directed.
+   * @returns {boolean} - True if the edge has a specific direction, false otherwise.
+   */
   isDirected() {
     return this.direction !== "any";
   }
 
+  /**
+   * Draws the edge on the canvas.
+   * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
+   */
   draw(ctx) {
     ctx.beginPath();
     ctx.moveTo(this.vertex1.x, this.vertex1.y);
