@@ -7,6 +7,8 @@ export class GraphHandler {
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext("2d");
     this.popup = new Popup();
+    this.selectedVertex = null;
+
     this.canvas.addEventListener("click", (event) => this.handleClick(event));
     this.graph.draw();
   }
@@ -20,6 +22,7 @@ export class GraphHandler {
     const clickedVertex = this.getVertexAt(x, y);
 
     if (clickedVertex) {
+      this.selectedVertex = clickedVertex;
       this.showPopup(clickedVertex);
     } else {
       // Add a new vertex if not clicking on an existing vertex
@@ -56,7 +59,7 @@ export class GraphHandler {
       {
         label: "Delete",
         action: () => {
-          alert(`Delete ${vertex.label}`);
+          this.removeVertex(vertex);
           this.popup.close();
         },
       },
@@ -68,5 +71,21 @@ export class GraphHandler {
       },
     ]);
     this.popup.show();
+  }
+
+  removeVertex(vertex) {
+    // Remove the vertex from the vertices array
+    const index = this.graph.vertices.indexOf(vertex);
+    if (index !== -1) {
+      this.graph.vertices.splice(index, 1);
+    }
+
+    // Remove edges connected to the vertex
+    this.graph.edges = this.graph.edges.filter(
+      (edge) => edge.vertex1 !== vertex && edge.vertex2 !== vertex
+    );
+
+    // Redraw the graph
+    this.graph.draw();
   }
 }
