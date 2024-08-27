@@ -14,5 +14,23 @@
       height="600"
       style="border: 1px solid #000000"
     ></canvas>
+
+    <div id="controls">
+      <button id="vertexModeBtn">Vertex Mode</button>
+      <button id="edgeModeBtn">Edge Mode</button>
+    </div>
+
+    <div id="status">Status: Ready</div>
+
+    <div id="edgeDirection" style="display: none">
+      <label
+        ><input type="radio" name="direction" value="any" checked />
+        Undirected</label
+      >
+      <label><input type="radio" name="direction" value="from" /> From</label>
+      <label><input type="radio" name="direction" value="to" /> To</label>
+    </div>
+    
+    <ol id="cppResultList"></ol>
   </body>
 </html>

@@ -18,3 +18,29 @@
 .popup-dialog button:hover {
   background-color: #0056b3;
 }
+
+#controls {
+  margin-top: 10px;
+}
+
+#controls button {
+  margin: 5px;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+#controls button:hover {
+  background-color: #0056b3;
+}
+
+#status {
+  margin-top: 10px;
+}
+
+#edgeDirection label {
+  margin-right: 10px;
+}

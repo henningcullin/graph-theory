@@ -20,6 +20,19 @@ export class Edge {
     this.vertex2 = vertex2;
     /** @type {Direction} */
     this.direction = direction;
+
+    /** @type {number} */
+    this.weight = this.calculateWeight();
+  }
+
+  /**
+   * Calculates the weight of the edge based on the distance between vertices.
+   * @returns {number} - The weight of the edge.
+   */
+  calculateWeight() {
+    const dx = this.vertex2.x - this.vertex1.x;
+    const dy = this.vertex2.y - this.vertex1.y;
+    return Math.sqrt(dx * dx + dy * dy);
   }
 
   /**
