@@ -1,12 +1,14 @@
-import { Graph } from "./Graph.js";
+import { Graph } from "./graph.js";
+import { Popup } from "./utils.js";
 
 export class GraphHandler {
   constructor(canvasId) {
     this.graph = new Graph(canvasId);
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext("2d");
-    this.selectedVertex = null;
+    this.popup = new Popup();
     this.canvas.addEventListener("click", (event) => this.handleClick(event));
+    this.graph.draw();
   }
 
   handleClick(event) {
@@ -14,18 +16,57 @@ export class GraphHandler {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    console.log("wow");
+    // Check if the click is on an existing vertex
+    const clickedVertex = this.getVertexAt(x, y);
 
-    if (this.selectedVertex) {
-      // Handle edge creation or other functionality if needed
-      this.selectedVertex = null;
+    if (clickedVertex) {
+      this.showPopup(clickedVertex);
     } else {
-      // Add a new vertex at the click location
+      // Add a new vertex if not clicking on an existing vertex
       const label = prompt("Enter label for the vertex:", "New Vertex");
       if (label) {
         this.graph.addVertex(x, y, label);
         this.graph.draw();
       }
     }
+  }
+
+  getVertexAt(x, y) {
+    // Find if there's a vertex near the clicked position
+    return this.graph.vertices.find((vertex) => {
+      const dx = vertex.x - x;
+      const dy = vertex.y - y;
+      return Math.sqrt(dx * dx + dy * dy) <= 20; // Assuming a radius of 20 for the vertex
+    });
+  }
+
+  showPopup(vertex) {
+    this.popup.setContent([
+      {
+        label: `Vertex: ${vertex.label}`,
+        action: () => {}, // Placeholder for action
+      },
+      {
+        label: "Edit",
+        action: () => {
+          alert(`Edit ${vertex.label}`);
+          this.popup.close();
+        },
+      },
+      {
+        label: "Delete",
+        action: () => {
+          alert(`Delete ${vertex.label}`);
+          this.popup.close();
+        },
+      },
+      {
+        label: "Cancel",
+        action: () => {
+          this.popup.close();
+        },
+      },
+    ]);
+    this.popup.show();
   }
 }
