@@ -5,9 +5,9 @@ export class Vertex {
   /**
    * @param {number} x - The x-coordinate of the vertex.
    * @param {number} y - The y-coordinate of the vertex.
-   * @param {string} label - The label of the vertex.
+   * @param {number} id - The id of the vertex.
    */
-  constructor(x, y, label) {
+  constructor(x, y, id) {
     /** @type {number} */
     this.x = x;
     /** @type {number} */
@@ -29,6 +29,6 @@ export class Vertex {
     ctx.fillStyle = "black";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(this.label, this.x, this.y);
+    ctx.fillText(this.id, this.x, this.y);
   }
 }

@@ -27,7 +27,7 @@ export class GraphHandler {
     this.currentMode = VERTEX_MODE; // Default mode
     /** @type {Vertex|null} */
     this.firstVertex = null;
-    /** @type {string} */
+    /** @type {import('./Edge.js').Direction} */
     this.currentDirection = "any"; // Default direction for edges
 
     // Set up control panel buttons
@@ -46,15 +46,6 @@ export class GraphHandler {
       });
     });
 
-    document
-      .querySelector('input[name="useAi"]')
-      .addEventListener("change", (event) => {
-        this.useVertexAutoincrement = event.target.checked;
-        this.updateStatus(
-          `Use autoincrement set to ${this.useVertexAutoincrement}`
-        );
-      });
-
     // Set up status display
     this.statusElement = document.getElementById("status");
 
@@ -71,11 +62,9 @@ export class GraphHandler {
     this.currentMode = mode;
     if (mode === EDGE_MODE) {
       document.getElementById("edgeDirection").style.display = "block";
-      document.getElementById("vertexSettings").style.display = "none";
       this.updateStatus("Click on the first vertex to start creating an edge.");
     } else {
       document.getElementById("edgeDirection").style.display = "none";
-      document.getElementById("vertexSettings").style.display = "block";
       this.updateStatus("Ready");
     }
   }
@@ -107,14 +96,9 @@ export class GraphHandler {
     if (clickedVertex) {
       this.showPopup(clickedVertex);
     } else {
-      let label = "";
-      if (this.useVertexAutoincrement) {
-        label = this.graph.vertices.length + 1 + "";
-      } else label = prompt("Enter label for the vertex:", "New Vertex");
-      if (label) {
-        this.graph.addVertex(x, y, label);
-        this.graph.draw();
-      }
+      const id = this.graph.vertices.length + 1;
+      this.graph.addVertex(x, y, id);
+      this.graph.draw();
     }
   }
 
@@ -162,13 +146,13 @@ export class GraphHandler {
   showPopup(vertex) {
     this.popup.setContent([
       {
-        label: `Vertex: ${vertex.label}`,
+        label: `Vertex: ${vertex.id}`,
         action: () => {}, // Placeholder for action
       },
       {
         label: "Edit",
         action: () => {
-          alert(`Edit ${vertex.label}`);
+          alert(`Edit ${vertex.id}`);
           this.popup.close();
         },
       },
