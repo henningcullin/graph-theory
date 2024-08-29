@@ -14,13 +14,14 @@ export class Edge {
    * @param {Direction} [direction='any'] - The direction of the edge.
    */
   constructor(vertex1, vertex2, direction = "any") {
+    vertex1.edges.push(this);
+    vertex2.edges.push(this);
     /** @type {Vertex} */
     this.vertex1 = vertex1;
     /** @type {Vertex} */
     this.vertex2 = vertex2;
     /** @type {Direction} */
     this.direction = direction;
-
     /** @type {number} */
     this.weight = this.calculateWeight();
   }

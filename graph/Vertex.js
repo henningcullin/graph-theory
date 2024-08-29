@@ -1,3 +1,5 @@
+import { Edge } from "./Edge.js";
+
 /**
  * Represents a vertex in the graph.
  */
@@ -12,8 +14,10 @@ export class Vertex {
     this.x = x;
     /** @type {number} */
     this.y = y;
-    /** @type {string} */
-    this.label = label;
+    /** @type {number} */
+    this.id = id;
+    /** @type {Edge[]} */
+    this.edges = [];
   }
 
   /**
