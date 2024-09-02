@@ -1,11 +1,28 @@
 const paths = [];
 let minPathWeight = Infinity;
-const MAX_RECURSION_LIMIT = 200;
+const MAX_DEPTH = 256; // Adjustable max depth for IDDFS
 
 onmessage = function (event) {
   const { startVertex, endVertex, edges } = event.data;
 
-  recursivelyTraversePath(startVertex, endVertex, edges, [], 0, 0);
+  // Initialize memoization map
+  const memo = new Map();
+
+  // Start iterative deepening depth-first search
+  for (let depth = 1; depth <= MAX_DEPTH; depth++) {
+    recursivelyTraversePath(
+      startVertex,
+      endVertex,
+      edges,
+      [],
+      0,
+      0,
+      depth,
+      memo
+    );
+    console.log(depth);
+    if (paths?.length) break;
+  }
 
   // Send the sorted paths back to the main thread
   postMessage({ paths: paths, type: "done" });
@@ -24,7 +41,9 @@ const canTravel = (edge, vertexId) =>
  * @returns {Edge[]}
  */
 const getOptions = (vertex) =>
-  vertex.edges.filter((edge) => canTravel(edge, vertex.id));
+  vertex.edges
+    .filter((edge) => canTravel(edge, vertex.id))
+    .sort((a, b) => a.weight - b.weight); // Sort edges by weight
 
 function recursivelyTraversePath(
   currentVertex,
@@ -32,13 +51,20 @@ function recursivelyTraversePath(
   edges,
   pathCarry,
   depth,
-  currentWeight
+  currentWeight,
+  maxDepth,
+  memo
 ) {
-  // Prune branches that exceed the recursion depth limit
-  if (depth > MAX_RECURSION_LIMIT) return console.log("Dropping: Recursion");
+  if (depth > maxDepth) return;
 
-  // Prune branches where the current path weight already exceeds the minimum found so far
-  if (currentWeight >= minPathWeight) return console.log("Dropping: Weight");
+  if (currentWeight >= minPathWeight) return;
+
+  /*   // Check if this state has been memoized
+  const memoKey = `${currentVertex.id}:${depth}`;
+  if (memo.has(memoKey) && memo.get(memoKey) <= currentWeight) {
+    return;
+  }
+  memo.set(memoKey, currentWeight); */
 
   const hasTraveled = (edge) =>
     pathCarry.findIndex(
@@ -56,7 +82,6 @@ function recursivelyTraversePath(
   if (pathCompleted()) {
     const pathObject = { path: pathCarry, weight: currentWeight };
     paths.push(pathObject);
-    // Update the minimum path weight
     if (currentWeight < minPathWeight) {
       minPathWeight = currentWeight;
     }
@@ -69,17 +94,17 @@ function recursivelyTraversePath(
     const nextVertex =
       edge.vertex1.id !== currentVertex.id ? edge.vertex1 : edge.vertex2;
 
-    // Calculate the new weight for this path
     const newWeight = currentWeight + edge.weight;
 
-    // Continue traversing with the updated path and weight
     recursivelyTraversePath(
       nextVertex,
       endVertex,
       edges,
-      [edge, ...pathCarry],
+      [...pathCarry, edge], // Use spread operator to avoid creating new arrays unnecessarily
       depth + 1,
-      newWeight
+      newWeight,
+      maxDepth,
+      memo
     );
   });
 }
