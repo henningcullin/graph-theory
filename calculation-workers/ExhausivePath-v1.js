@@ -1,10 +1,11 @@
 const paths = [];
-const MAX_RECURSION_LIMIT = 16;
+let minPathWeight = Infinity;
+const MAX_RECURSION_LIMIT = 200;
 
 onmessage = function (event) {
   const { startVertex, endVertex, edges } = event.data;
 
-  recursivelyTraversePath(startVertex, endVertex, edges, [], 0);
+  recursivelyTraversePath(startVertex, endVertex, edges, [], 0, 0);
 
   // Send the sorted paths back to the main thread
   postMessage({ paths: paths, type: "done" });
@@ -30,9 +31,14 @@ function recursivelyTraversePath(
   endVertex,
   edges,
   pathCarry,
-  depth
+  depth,
+  currentWeight
 ) {
-  if (depth > MAX_RECURSION_LIMIT) return;
+  // Prune branches that exceed the recursion depth limit
+  if (depth > MAX_RECURSION_LIMIT) return console.log("Dropping: Recursion");
+
+  // Prune branches where the current path weight already exceeds the minimum found so far
+  if (currentWeight >= minPathWeight) return console.log("Dropping: Weight");
 
   const hasTraveled = (edge) =>
     pathCarry.findIndex(
@@ -48,8 +54,12 @@ function recursivelyTraversePath(
   const pathCompleted = () => allEdgesTraveled() && isEndVertex();
 
   if (pathCompleted()) {
-    const pathObject = { path: pathCarry, weight: pathWeight(pathCarry) };
+    const pathObject = { path: pathCarry, weight: currentWeight };
     paths.push(pathObject);
+    // Update the minimum path weight
+    if (currentWeight < minPathWeight) {
+      minPathWeight = currentWeight;
+    }
     return;
   }
 
@@ -59,12 +69,17 @@ function recursivelyTraversePath(
     const nextVertex =
       edge.vertex1.id !== currentVertex.id ? edge.vertex1 : edge.vertex2;
 
+    // Calculate the new weight for this path
+    const newWeight = currentWeight + edge.weight;
+
+    // Continue traversing with the updated path and weight
     recursivelyTraversePath(
       nextVertex,
       endVertex,
       edges,
       [edge, ...pathCarry],
-      depth + 1
+      depth + 1,
+      newWeight
     );
   });
 }
