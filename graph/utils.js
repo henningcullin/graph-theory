@@ -65,3 +65,8 @@ export class Popup {
     this.dialog.close();
   }
 }
+
+export const domLoaded = async () =>
+  new Promise((resolve) => {
+    document.addEventListener("DOMContentLoaded", resolve);
+  });
