@@ -19,8 +19,36 @@ document.getElementById("calculateRoute").addEventListener("click", () => {
     vertices.find((vertex) => vertex.id === parseInt(endId)),
   ];
 
-  BruteForceCalculate(startVertex, endVertex, edges);
+  //BruteForceCalculate(startVertex, endVertex, edges);
+  ExhaustiveCalculation(startVertex, endVertex, edges);
 });
+
+function ExhaustiveCalculation(startVertex, endVertex, edges) {
+  const worker = new Worker("calculation-workers/ExhausivePath-v1.js");
+
+  worker.onmessage = function (event) {
+    const { type, progress, paths } = event.data;
+
+    if (type === "progress") {
+      // Update the corresponding meter element
+      /* const meterElement = document.getElementById(meterIds[i]);
+      meterElement.value = progress / 100; */
+    } else if (type === "done") {
+      /*       allPaths = allPaths.concat(paths);
+      completedWorkers++;
+
+      if (completedWorkers === NUM_WORKERS) {
+        // Sort the combined paths when all workers are done
+        allPaths
+        console.log(allPaths);
+      } */
+      paths.sort((a, b) => a.weight - b.weight);
+      console.log(paths);
+    }
+  };
+
+  worker.postMessage({ startVertex, endVertex, edges });
+}
 
 function BruteForceCalculate(startVertex, endVertex, edges) {
   const NUM_WORKERS = 4;
