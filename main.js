@@ -19,119 +19,52 @@ document.getElementById("calculateRoute").addEventListener("click", () => {
     vertices.find((vertex) => vertex.id === parseInt(endId)),
   ];
 
-  /**
-   *
-   * @param {Edge[]} path
-   * @returns {number}
-   */
-  const pathWeight = (path) => path.reduce((acc, curr) => acc + curr.weight, 0);
-
-  const paths = [];
-
-  for (let i = 0; i < 10000; i++) {
-    const path = traversePath({ startVertex, endVertex, edges });
-    const weight = pathWeight(path);
-
-    paths.push({ path, weight });
-  }
-
-  paths.sort((a, b) => a.weight - b.weight);
-
-  console.log(paths);
+  BruteForceCalculate(startVertex, endVertex, edges);
 });
 
-/**
- *
- * @param {{startVertex: Vertex, endVertex: Vertex, edges: Edge[], vertices: Vertex[]}} param0
- * @returns
- */
-function traversePath({ startVertex, endVertex, edges }) {
-  /** @type {Edge[]} */
-  const traveledEdges = [];
+function BruteForceCalculate(startVertex, endVertex, edges) {
+  const NUM_WORKERS = 4;
+  const TOTAL_ITERATIONS = document.getElementById("iterationCount").value;
+  const iterationsPerWorker = Math.ceil(TOTAL_ITERATIONS / NUM_WORKERS);
 
-  let currentVertex = startVertex;
+  const workers = [];
+  const meterIds = ["meter1", "meter2", "meter3", "meter4"];
+  let completedWorkers = 0;
+  let allPaths = [];
 
-  /**
-   *
-   * @param {Edge} edge
-   * @returns {boolean}
-   */
-  const hasTraveled = (edge) =>
-    traveledEdges.findIndex(
-      (traveled) =>
-        traveled.vertex1.id === edge.vertex1.id &&
-        traveled.vertex2.id === edge.vertex2.id
-    ) !== -1;
+  // Create multiple workers and set up their message handlers
+  for (let i = 0; i < NUM_WORKERS; i++) {
+    const worker = new Worker("calculation-workers/BruteForce-v1.js");
 
-  /**
-   *
-   * @returns {boolean}
-   */
-  const allEdgesTraveled = () => edges.every(hasTraveled);
+    worker.onmessage = function (event) {
+      const { type, progress, paths } = event.data;
 
-  /**
-   *
-   * @returns {boolean}
-   */
-  const isEndVertex = () => currentVertex.id === endVertex.id;
+      if (type === "progress") {
+        // Update the corresponding meter element
+        const meterElement = document.getElementById(meterIds[i]);
+        meterElement.value = progress / 100;
+      } else if (type === "done") {
+        allPaths = allPaths.concat(paths);
+        completedWorkers++;
 
-  /**
-   *
-   * @returns {boolean}
-   */
-  const routeCompleted = () => allEdgesTraveled() && isEndVertex();
+        if (completedWorkers === NUM_WORKERS) {
+          // Sort the combined paths when all workers are done
+          allPaths.sort((a, b) => a.weight - b.weight);
+          console.log(allPaths);
+        }
+      }
+    };
 
-  /**
-   *
-   * @param {Edge} edge
-   * @returns {boolean}
-   */
-  const canTravel = (edge, vertexId) =>
-    edge.direction === "any" ||
-    (edge.direction === "from" && edge.vertex1.id === vertexId) ||
-    (edge.direction === "to" && edge.vertex2.id === vertexId);
-
-  /**
-   *
-   * @param {Vertex} vertex
-   * @returns {Edge[]}
-   */
-  const getOptions = (vertex) =>
-    vertex.edges.filter((edge) => canTravel(edge, vertex.id));
-
-  /**
-   *
-   * @param {Edge[]} edges
-   * @returns {Edge}
-   */
-  function pickRandomEdge(edges) {
-    if (edges.length === 0) return undefined;
-    const randomIndex = Math.floor(Math.random() * edges.length);
-    return edges[randomIndex];
+    workers.push(worker);
   }
 
-  while (!routeCompleted()) {
-    const options = getOptions(currentVertex);
-
-    const selectedEdge = pickRandomEdge(options);
-
-    if (!selectedEdge)
-      console.error(
-        "no edge selected from options:",
-        options,
-        "and from current vertex:",
-        currentVertex
-      );
-
-    const nextVertex =
-      selectedEdge.vertex1.id !== currentVertex.id
-        ? selectedEdge.vertex1
-        : selectedEdge.vertex2;
-
-    currentVertex = nextVertex;
-
-    traveledEdges.push(selectedEdge);
+  // Send data to each worker
+  for (let i = 0; i < NUM_WORKERS; i++) {
+    workers[i].postMessage({
+      startVertex,
+      endVertex,
+      edges,
+      iterations: iterationsPerWorker,
+    });
   }
-
-  return traveledEdges;
 }
