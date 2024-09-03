@@ -1,7 +1,5 @@
-import { Edge } from "./graph/Edge.js";
 import { GraphHandler } from "./graph/GraphHandler.js";
 import { domLoaded } from "./graph/utils.js";
-import { Vertex } from "./graph/Vertex.js";
 
 await domLoaded();
 
@@ -24,24 +22,14 @@ document.getElementById("calculateRoute").addEventListener("click", () => {
 });
 
 function ExhaustiveCalculation(startVertex, endVertex, edges) {
-  const worker = new Worker("calculation-workers/ExhausivePath-v1.js");
+  const worker = new Worker(
+    "calculation/chinese-postman-problem/ExhausivePath-v1.js"
+  );
 
   worker.onmessage = function (event) {
-    const { type, progress, paths } = event.data;
+    const { type, paths } = event.data;
 
-    if (type === "progress") {
-      // Update the corresponding meter element
-      /* const meterElement = document.getElementById(meterIds[i]);
-      meterElement.value = progress / 100; */
-    } else if (type === "done") {
-      /*       allPaths = allPaths.concat(paths);
-      completedWorkers++;
-
-      if (completedWorkers === NUM_WORKERS) {
-        // Sort the combined paths when all workers are done
-        allPaths
-        console.log(allPaths);
-      } */
+    if (type === "done") {
       paths.sort((a, b) => a.weight - b.weight);
       console.log(paths);
     }
@@ -62,7 +50,9 @@ function BruteForceCalculate(startVertex, endVertex, edges) {
 
   // Create multiple workers and set up their message handlers
   for (let i = 0; i < NUM_WORKERS; i++) {
-    const worker = new Worker("calculation-workers/BruteForce-v1.js");
+    const worker = new Worker(
+      "calculation/chinese-postman-problem/BruteForce-v1.js"
+    );
 
     worker.onmessage = function (event) {
       const { type, progress, paths } = event.data;
