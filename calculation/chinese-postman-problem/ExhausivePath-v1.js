@@ -5,25 +5,12 @@ const MAX_DEPTH = 256; // Adjustable max depth for IDDFS
 onmessage = function (event) {
   const { startVertex, endVertex, edges } = event.data;
 
-  // Initialize memoization map
-  const memo = new Map();
-
   // Start iterative deepening depth-first search
   for (let depth = 1; depth <= MAX_DEPTH; depth++) {
-    recursivelyTraversePath(
-      startVertex,
-      endVertex,
-      edges,
-      [],
-      0,
-      0,
-      depth,
-      memo
-    );
+    recursivelyTraversePath(startVertex, endVertex, edges, [], 0, 0, depth);
     console.log(depth);
     if (paths?.length) break;
   }
-
   // Send the sorted paths back to the main thread
   postMessage({ paths: paths, type: "done" });
 };
@@ -52,19 +39,11 @@ function recursivelyTraversePath(
   pathCarry,
   depth,
   currentWeight,
-  maxDepth,
-  memo
+  maxDepth
 ) {
   if (depth > maxDepth) return;
 
   if (currentWeight >= minPathWeight) return;
-
-  /*   // Check if this state has been memoized
-  const memoKey = `${currentVertex.id}:${depth}`;
-  if (memo.has(memoKey) && memo.get(memoKey) <= currentWeight) {
-    return;
-  }
-  memo.set(memoKey, currentWeight); */
 
   const hasTraveled = (edge) =>
     pathCarry.findIndex(
@@ -103,8 +82,7 @@ function recursivelyTraversePath(
       [...pathCarry, edge], // Use spread operator to avoid creating new arrays unnecessarily
       depth + 1,
       newWeight,
-      maxDepth,
-      memo
+      maxDepth
     );
   });
 }
