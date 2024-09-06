@@ -5,7 +5,7 @@ import {
   sp_dijkstra_v1,
 } from "./calculation/v1/WorkerScripts.js";
 import { get_flood_filled } from "./calculation/v2/flood_fill.js";
-import { canTravel } from "./calculation/v2/utils.js";
+import { canTravel, unwrap } from "./calculation/v2/utils.js";
 import { GraphHandler } from "./graph/GraphHandler.js";
 import { domLoaded } from "./graph/utils.js";
 import { Vertex } from "./graph/Vertex.js";
@@ -75,6 +75,23 @@ function build_eulerian_graph(startVertex, endVertex) {
 
   console.log("inDegree", inDegree);
   console.log("outDegree", outDegree);
+
+  /**
+   * Array of all unbalanced verticies
+   * The first first element is the vertexId
+   * The second element is the difference in degress from inDegrees-outDegrees
+   * @type {number[][]}
+   */
+  const unBalanced = Array.from(inDegree.entries())
+    .map(([vertexId, inDegrees]) => {
+      const diffDegrees = inDegrees - unwrap(outDegree.get(vertexId));
+      if (diffDegrees !== 0) {
+        return [vertexId, diffDegrees];
+      }
+    })
+    .filter((item) => typeof item !== "undefined");
+
+  console.log(unBalanced);
 }
 
 /**
