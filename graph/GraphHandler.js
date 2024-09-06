@@ -199,6 +199,5 @@ export class GraphHandler {
     if (this.statusElement) {
       this.statusElement.textContent = `Status: ${message}`;
     }
-    console.log(this.graph);
   }
 }

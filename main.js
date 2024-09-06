@@ -17,11 +17,41 @@ document.getElementById("calculateRoute").addEventListener("click", () => {
     vertices.find((vertex) => vertex.id === parseInt(endId)),
   ];
 
-  //BruteForceCalculate(startVertex, endVertex, edges);
-  ExhaustiveCalculation(startVertex, endVertex, edges);
+  const methods = {
+    "ccp-dijkstra-1": () => ccp_dijkstra_v1(startVertex, endVertex, edges),
+    "ccp-brute-1": () => ccp_brute_v1(startVertex, endVertex, edges),
+    "ccp-exhaustive-1": () => ccp_exhaustive_v1(startVertex, endVertex, edges),
+    "sp-dijkstra-1": () => sp_dijkstra_v1(startVertex, endVertex, edges),
+  };
+
+  const method = document.getElementById("calculationMethod").value;
+
+  console.log("calculating using method", method);
+
+  methods[method]();
 });
 
-function ExhaustiveCalculation(startVertex, endVertex, edges) {
+function ccp_dijkstra_v1(startVertex, endVertex, edges) {
+  const worker = new Worker(
+    "calculation/chinese-postman-problem/Dijkstra-v1.js"
+  );
+
+  worker.onmessage = function (event) {
+    const { type, paths } = event.data;
+
+    if (type === "done") {
+      console.log(paths);
+    }
+  };
+
+  worker.postMessage({
+    startVertex,
+    endVertex,
+    edges,
+  });
+}
+
+function ccp_exhaustive_v1(startVertex, endVertex, edges) {
   const worker = new Worker(
     "calculation/chinese-postman-problem/ExhausivePath-v1.js"
   );
@@ -38,7 +68,7 @@ function ExhaustiveCalculation(startVertex, endVertex, edges) {
   worker.postMessage({ startVertex, endVertex, edges });
 }
 
-function BruteForceCalculate(startVertex, endVertex, edges) {
+function ccp_brute_v1(startVertex, endVertex, edges) {
   const NUM_WORKERS = 4;
   const TOTAL_ITERATIONS = document.getElementById("iterationCount").value;
   const iterationsPerWorker = Math.ceil(TOTAL_ITERATIONS / NUM_WORKERS);
@@ -85,4 +115,22 @@ function BruteForceCalculate(startVertex, endVertex, edges) {
       iterations: iterationsPerWorker,
     });
   }
+}
+
+function sp_dijkstra_v1(startVertex, endVertex, edges) {
+  const worker = new Worker("calculation/shortest-path/Dijkstra-v1.js");
+
+  worker.onmessage = function (event) {
+    const { type, paths } = event.data;
+
+    if (type === "done") {
+      console.log(paths);
+    }
+  };
+
+  worker.postMessage({
+    startVertex,
+    endVertex,
+    edges,
+  });
 }

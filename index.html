@@ -24,7 +24,7 @@
     <div id="status">Status: Ready</div>
 
     <div>
-      <radio-button-group id="edgeDirection" style="display: none">
+      <radio-button-group id="edgeDirection" style="display: none" value="any">
         <label
           ><input type="radio" name="direction" value="any" checked />
           Undirected</label
@@ -46,6 +46,31 @@
     </div>
 
     <div>
+      <h3>Explanations</h3>
+      <p><b>[CCP]</b>Calculates Chinese Postman Problem</p>
+      <p><b>[SP]</b>Calculates Shortest Path</p>
+      <radio-button-group id="calculationMethod" value="brute-1">
+        <label
+          title="Calculate Chinese Postman Problem using Dijkstra's algoritm"
+          ><input type="radio" value="ccp-dijkstra-1" />[CCP] Dijkstra V1</label
+        >
+        <label
+          title="Calculate Chinese Postman Problem using random (n) amount of random traversals"
+          ><input type="radio" value="ccp-brute-1" />[CCP] Brute force V1</label
+        >
+        <label
+          title="Calculate Chinese Postman Problem using an exhaustive algorithm"
+          ><input type="radio" value="ccp-exhaustive-1" />[CCP] Exhaustive
+          V1</label
+        >
+        <label
+          title="Find the shortest path a - b. Uses Dijksra algorithm but doesn't solve Chinese Postman Problem"
+          ><input type="radio" value="sp-dijkstra-1" />[SP] Dijkstra V1</label
+        >
+      </radio-button-group>
+    </div>
+
+    <div>
       <label for="meter1">Worker 1</label>
       <meter value="" id="meter1"></meter>
       <label for="meter2">Worker 2</label>
@@ -55,5 +80,7 @@
       <label for="meter4">Worker 4</label>
       <meter value="" id="meter4"></meter>
     </div>
+
+    <br /><br /><br />
   </body>
 </html>
