@@ -1,5 +1,6 @@
 import { Vertex } from "./Vertex.js";
 import { Edge } from "./Edge.js";
+import { unwrap } from "../calculation/v2/utils.js";
 
 /**
  * Represents the graph, including vertices and edges.
@@ -14,16 +15,18 @@ export class Graph {
     /** @type {Edge[]} */
     this.edges = [];
     /** @type {HTMLCanvasElement} */
-    this.canvas = document.getElementById(canvasId);
+    this.canvas = /** @type {HTMLCanvasElement} */ (
+      unwrap(document.getElementById(canvasId))
+    );
     /** @type {CanvasRenderingContext2D} */
-    this.ctx = this.canvas.getContext("2d");
+    this.ctx = unwrap(this.canvas.getContext("2d"));
   }
 
   /**
    * Adds a vertex to the graph.
    * @param {number} x - The x-coordinate of the vertex.
    * @param {number} y - The y-coordinate of the vertex.
-   * @param {string} label - The label of the vertex.
+   * @param {number} label - The label of the vertex.
    * @returns {Vertex} - The created vertex.
    */
   addVertex(x, y, label) {
@@ -36,7 +39,7 @@ export class Graph {
    * Adds an edge between two vertices.
    * @param {Vertex} vertex1 - The starting vertex of the edge.
    * @param {Vertex} vertex2 - The ending vertex of the edge.
-   * @param {Direction} [direction='any'] - The direction of the edge.
+   * @param {import('./Edge.js').Direction} [direction='any'] - The direction of the edge.
    */
   addEdge(vertex1, vertex2, direction = "any") {
     const edge = new Edge(vertex1, vertex2, direction, this.edges.length + 1);

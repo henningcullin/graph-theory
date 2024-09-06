@@ -1,5 +1,6 @@
 import { Edge } from "../../graph/Edge.js";
-import { canTravel } from "./utils.js";
+import { Vertex } from "../../graph/Vertex.js";
+import { canTravel, unwrap } from "./utils.js";
 
 /**
  *
@@ -14,7 +15,7 @@ function flood_fill(startVertex) {
   const visitedVerticies = new Map();
 
   while (queue?.length > 0) {
-    const currentVertex = queue.shift();
+    const currentVertex = unwrap(queue.shift());
 
     visitedVerticies.set(currentVertex.id, currentVertex);
 

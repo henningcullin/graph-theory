@@ -14,10 +14,11 @@ await domLoaded();
 
 const graphHandler = new GraphHandler("graphCanvas");
 
-document.getElementById("calculateRoute").addEventListener("click", () => {
-  const [startId, endId] = prompt(
-    "Enter the start id and end id. They should be separated by a comma"
-  ).split(",");
+document.getElementById("calculateRoute")?.addEventListener("click", () => {
+  const [startId, endId] =
+    prompt(
+      "Enter the start id and end id. They should be separated by a comma"
+    )?.split(",") ?? [];
 
   const { vertices, edges } = graphHandler.graph;
 
@@ -25,6 +26,9 @@ document.getElementById("calculateRoute").addEventListener("click", () => {
     vertices.find((vertex) => vertex.id === parseInt(startId)),
     vertices.find((vertex) => vertex.id === parseInt(endId)),
   ];
+
+  if (!(startVertex instanceof Vertex) || !(endVertex instanceof Vertex))
+    return console.error("start or end vertex was undefined");
 
   solve_chinese_postman_problem(startVertex, endVertex);
 
@@ -35,11 +39,17 @@ document.getElementById("calculateRoute").addEventListener("click", () => {
     "sp-dijkstra-1": () => sp_dijkstra_v1(startVertex, endVertex, edges),
   };
 
-  const method = document.getElementById("calculationMethod").value;
+  const methodGroup = document.getElementById("calculationMethod");
 
-  methods[method]();
+  // @ts-ignore
+  const method = methodGroup?.hasAttribute("value") ? methodGroup?.value : "";
 });
 
+/**
+ *
+ * @param {Vertex} startVertex
+ * @param {Vertex} endVertex
+ */
 function solve_chinese_postman_problem(startVertex, endVertex) {
   try {
     const eulearianGraph = build_eulerian_graph(startVertex, endVertex);
@@ -48,6 +58,11 @@ function solve_chinese_postman_problem(startVertex, endVertex) {
   }
 }
 
+/**
+ *
+ * @param {Vertex} startVertex
+ * @param {Vertex} endVertex
+ */
 function build_eulerian_graph(startVertex, endVertex) {
   const [vertexMap, edgeMap] = get_flood_filled(startVertex, endVertex);
 
@@ -65,9 +80,10 @@ function build_eulerian_graph(startVertex, endVertex) {
 /**
  *
  * @param {Vertex[]} vertices
+ * @param {number[]} idFilter
  * @returns {{inDegree: Map<number, number>, outDegree: Map<number, number>}}
  */
-function compute_degress(vertices) {
+function compute_degress(vertices, idFilter = []) {
   // Maps to store in-degrees and out-degrees per vertexId
   const inDegree = new Map();
   const outDegree = new Map();
@@ -92,6 +108,16 @@ function compute_degress(vertices) {
         inDegree.set(vertex.id, inDegree.get(vertex.id) + 1);
       }
     });
+  });
+
+  vertices.forEach((vertex) => {
+    if (inDegree.get(vertex.id) === 0 || outDegree.get(vertex.id) === 0) {
+      const error = new Error("Unreachable vertex detected");
+
+      error.cause = { allVerticies: vertices, offendingVertex: vertex };
+
+      throw error;
+    }
   });
 
   return { inDegree, outDegree };

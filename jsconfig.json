@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "checkJs": true, // Enable type-checking for JS files.
+    "noEmit": true, // Prevent emitting any output files.
+    "allowJs": true, // Allow JavaScript files in the project.
+    "target": "es2022", // Target ECMAScript version.
+    "module": "es2022", // Module system (you can change this if needed).
+    "strict": true, // Enable all strict type-checking options.
+    "maxNodeModuleJsDepth": 2 // Controls how deep the language service will analyze JavaScript files in node_modules.
+  },
+  "include": [
+    "./**/*.js" // Include all JS files in the 'src' folder (adjust path as needed).
+  ]
+}

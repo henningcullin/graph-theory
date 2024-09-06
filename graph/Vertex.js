@@ -33,6 +33,6 @@ export class Vertex {
     ctx.fillStyle = "black";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(this.id, this.x, this.y);
+    ctx.fillText(this.id.toString(), this.x, this.y);
   }
 }

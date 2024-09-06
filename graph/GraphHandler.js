@@ -1,5 +1,7 @@
-import { Graph } from "./graph.js";
+import { unwrap } from "../calculation/v2/utils.js";
+import { Graph } from "./Graph.js";
 import { Popup } from "./utils.js";
+import { Vertex } from "./Vertex.js";
 
 /** @typedef {0 | 1} Mode */
 
@@ -18,9 +20,11 @@ export class GraphHandler {
     /** @type {Graph} */
     this.graph = new Graph(canvasId);
     /** @type {HTMLCanvasElement} */
-    this.canvas = document.getElementById(canvasId);
+    this.canvas = /** @type {HTMLCanvasElement} */ (
+      unwrap(document.getElementById(canvasId))
+    );
     /** @type {CanvasRenderingContext2D} */
-    this.ctx = this.canvas.getContext("2d");
+    this.ctx = unwrap(this.canvas.getContext("2d"));
     /** @type {Popup} */
     this.popup = new Popup();
     /** @type {Mode} */
@@ -32,14 +36,28 @@ export class GraphHandler {
 
     // Set up control panel buttons
     document
-      .getElementById("vertexModeBtn")
-      .addEventListener("click", () => this.setMode(VERTEX_MODE));
+      ?.getElementById("vertexModeBtn")
+      ?.addEventListener("click", () => this.setMode(VERTEX_MODE));
     document
-      .getElementById("edgeModeBtn")
-      .addEventListener("click", () => this.setMode(EDGE_MODE));
+      ?.getElementById("edgeModeBtn")
+      ?.addEventListener("click", () => this.setMode(EDGE_MODE));
 
     // Set up edge direction controls
-    document.getElementById("edgeDirection").onChange = (event) => {
+    /** @type {HTMLCanvasElement} */
+    this.canvas = /** @type {HTMLCanvasElement} */ (
+      unwrap(document.getElementById(canvasId))
+    );
+    /** @type {RadioButtonGroup} */
+    const edgeDirectionGroup = unwrap(
+      /** @type {RadioButtonGroup} */ (
+        document?.getElementById("edgeDirection")
+      )
+    );
+    /**
+     *
+     * @param {*} event
+     */
+    edgeDirectionGroup.onChange = (event) => {
       this.currentDirection = event.detail.value;
       this.updateStatus(`Edge direction set to ${this.currentDirection}`);
     };
@@ -54,15 +72,16 @@ export class GraphHandler {
 
   /**
    * Sets the current mode of the graph handler.
-   * @param {number} mode - The mode to set.
+   * @param {Mode} mode - The mode to set.
    */
   setMode(mode) {
     this.currentMode = mode;
     if (mode === EDGE_MODE) {
-      document.getElementById("edgeDirection").style.display = "block";
+      unwrap(document?.getElementById("edgeDirection")?.style).display =
+        "block";
       this.updateStatus("Click on the first vertex to start creating an edge.");
     } else {
-      document.getElementById("edgeDirection").style.display = "none";
+      unwrap(document?.getElementById("edgeDirection")?.style).display = "none";
       this.updateStatus("Ready");
     }
   }
@@ -127,7 +146,7 @@ export class GraphHandler {
    * Finds if there's a vertex near the clicked position.
    * @param {number} x - The x-coordinate of the click.
    * @param {number} y - The y-coordinate of the click.
-   * @returns {Vertex|null} - The vertex if found, otherwise null.
+   * @returns {Vertex | undefined} - The vertex if found, otherwise null.
    */
   getVertexAt(x, y) {
     return this.graph.vertices.find((vertex) => {
