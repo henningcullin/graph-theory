@@ -12,8 +12,9 @@ export class Edge {
    * @param {Vertex} vertex1 - The starting vertex of the edge.
    * @param {Vertex} vertex2 - The ending vertex of the edge.
    * @param {Direction} [direction='any'] - The direction of the edge.
+   * @param {number} [id] - The id of the edge.
    */
-  constructor(vertex1, vertex2, direction = "any") {
+  constructor(vertex1, vertex2, direction = "any", id) {
     vertex1.edges.push(this);
     vertex2.edges.push(this);
     /** @type {Vertex} */
@@ -22,6 +23,8 @@ export class Edge {
     this.vertex2 = vertex2;
     /** @type {Direction} */
     this.direction = direction;
+    /** @type {number} */
+    this.id = id;
     /** @type {number} */
     this.weight = this.calculateWeight();
   }
