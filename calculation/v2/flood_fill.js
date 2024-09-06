@@ -1,3 +1,4 @@
+import { Edge } from "../../graph/Edge.js";
 import { canTravel } from "./utils.js";
 
 /**
@@ -38,10 +39,13 @@ function flood_fill(startVertex) {
  *
  * @param {Vertex} startVertex
  * @param {Vertex} endVertex
- * @returns {Edge[] | Error}
+ * @returns {Map<number, Edge> | Error}
  */
 export function get_edges(startVertex, endVertex) {
   const vertexMap = flood_fill(startVertex);
+
+  if (!vertexMap.has(endVertex.id))
+    return new Error("startVertex and endVertex not connected!");
 
   const edges = Array.from(vertexMap.values()).reduce((acc, curr) => {
     curr.edges.forEach((edge) => {
@@ -51,6 +55,5 @@ export function get_edges(startVertex, endVertex) {
     return acc;
   }, new Map());
 
-  if (!edges.has(endVertex.id))
-    return new Error("startVertex and endVertex not connected!");
+  return edges;
 }
