@@ -6,3 +6,7 @@
 - Ge till baka en lista av ordningen vi går över kanter
 
   Så om vi går från kant a-b sen b-d sen d-b ska dessa kanter hamna i den här ordningen när vi ritar upp
+
+## Tankar
+
+- Eulerväg:

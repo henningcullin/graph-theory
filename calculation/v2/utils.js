@@ -7,7 +7,8 @@ import { Edge } from "../../graph/Edge.js";
  * @returns {boolean}
  */
 export const canTravel = (edge, vertexId, reverse = false) =>
-  edge.direction === "any" ||
+  (edge.direction === "any" &&
+    (edge.vertex1.id === vertexId || edge.vertex2.id === vertexId)) ||
   (reverse
     ? (edge.direction === "from" && edge.vertex2.id === vertexId) ||
       (edge.direction === "to" && edge.vertex1.id === vertexId)

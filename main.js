@@ -28,8 +28,6 @@ document.getElementById("calculateRoute").addEventListener("click", () => {
 
   solve_chinese_postman_problem(startVertex, endVertex);
 
-  return;
-
   const methods = {
     "ccp-dijkstra-1": () => ccp_dijkstra_v1(startVertex, endVertex, edges),
     "ccp-brute-1": () => ccp_brute_v1(startVertex, endVertex, edges),
@@ -62,14 +60,6 @@ function build_eulerian_graph(startVertex, endVertex) {
 
   console.log("inDegree", inDegree);
   console.log("outDegree", outDegree);
-
-  const imbalanced_verticies = get_imbalanced_verticies(inDegree, outDegree);
-
-  console.log(imbalanced_verticies);
-
-  if (imbalanced_verticies.length === 0) {
-    console.log("The graph is already Eulerian.");
-  }
 }
 
 /**
@@ -105,26 +95,4 @@ function compute_degress(vertices) {
   });
 
   return { inDegree, outDegree };
-}
-
-/**
- *
- * @param {Map<number, number>} inDegree
- * @param {Map<number, number>} outDegree
- * @returns
- */
-function get_imbalanced_verticies(inDegree, outDegree) {
-  const imbalancedVertices = [];
-
-  inDegree.forEach((deg, vertexId) => {
-    const outDeg = outDegree.get(vertexId);
-    if (deg !== outDeg) {
-      imbalancedVertices.push({
-        vertexId,
-        imbalance: outDeg - deg,
-      });
-    }
-  });
-
-  return imbalancedVertices;
 }

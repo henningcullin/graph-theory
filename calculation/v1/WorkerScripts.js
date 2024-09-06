@@ -1,6 +1,6 @@
 export function ccp_dijkstra_v1(startVertex, endVertex, edges) {
   const worker = new Worker(
-    "calculation/chinese-postman-problem/Dijkstra-v1.js"
+    "calculation/v1/chinese-postman-problem/Dijkstra-v1.js"
   );
 
   worker.onmessage = function (event) {
@@ -20,7 +20,7 @@ export function ccp_dijkstra_v1(startVertex, endVertex, edges) {
 
 export function ccp_exhaustive_v1(startVertex, endVertex, edges) {
   const worker = new Worker(
-    "calculation/chinese-postman-problem/ExhausivePath-v1.js"
+    "calculation/v1/chinese-postman-problem/ExhausivePath-v1.js"
   );
 
   worker.onmessage = function (event) {
@@ -48,7 +48,7 @@ export function ccp_brute_v1(startVertex, endVertex, edges) {
   // Create multiple workers and set up their message handlers
   for (let i = 0; i < NUM_WORKERS; i++) {
     const worker = new Worker(
-      "calculation/chinese-postman-problem/BruteForce-v1.js"
+      "calculation/v1/chinese-postman-problem/BruteForce-v1.js"
     );
 
     worker.onmessage = function (event) {
@@ -85,7 +85,7 @@ export function ccp_brute_v1(startVertex, endVertex, edges) {
 }
 
 export function sp_dijkstra_v1(startVertex, endVertex, edges) {
-  const worker = new Worker("calculation/shortest-path/Dijkstra-v1.js");
+  const worker = new Worker("calculation/v1/shortest-path/Dijkstra-v1.js");
 
   worker.onmessage = function (event) {
     const { type, paths } = event.data;

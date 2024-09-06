@@ -1,3 +1,5 @@
+import { canTravel } from "../calculation/v2/utils";
+
 class PriorityQueue {
   constructor() {
     this.elements = [];
@@ -16,21 +18,6 @@ class PriorityQueue {
     return this.elements.length === 0;
   }
 }
-
-onmessage = function (event) {
-  const { startVertex, endVertex, edges } = event.data;
-
-  // Execute Dijkstra's algorithm to find the shortest path
-  const shortestPath = dijkstra(startVertex, endVertex, edges);
-
-  // Send the result back to the main thread
-  postMessage({ paths: shortestPath ? [shortestPath] : [], type: "done" });
-};
-
-const canTravel = (edge, vertexId) =>
-  edge.direction === "any" ||
-  (edge.direction === "from" && edge.vertex1.id === vertexId) ||
-  (edge.direction === "to" && edge.vertex2.id === vertexId);
 
 const getOptions = (vertex) =>
   vertex.edges.filter((edge) => canTravel(edge, vertex.id));
