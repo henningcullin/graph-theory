@@ -39,15 +39,15 @@ function flood_fill(startVertex) {
  *
  * @param {Vertex} startVertex
  * @param {Vertex} endVertex
- * @returns {Map<number, Edge> | Error}
+ * @returns {[Map<number, Vertex>, Map<number, Edge>]}
  */
-export function get_edges(startVertex, endVertex) {
+export function get_flood_filled(startVertex, endVertex) {
   const vertexMap = flood_fill(startVertex);
 
   if (!vertexMap.has(endVertex.id))
-    return new Error("startVertex and endVertex not connected!");
+    throw new Error("startVertex and endVertex not connected!");
 
-  const edges = Array.from(vertexMap.values()).reduce((acc, curr) => {
+  const edgeMap = Array.from(vertexMap.values()).reduce((acc, curr) => {
     curr.edges.forEach((edge) => {
       if (!acc.has(edge.id)) acc.set(edge.id, edge);
     });
@@ -55,5 +55,5 @@ export function get_edges(startVertex, endVertex) {
     return acc;
   }, new Map());
 
-  return edges;
+  return [vertexMap, edgeMap];
 }
