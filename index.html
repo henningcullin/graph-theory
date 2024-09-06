@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Interactive Graph</title>
     <link rel="stylesheet" href="style.css" />
+    <script src="componentLib.js"></script>
     <script type="module" src="./main.js" defer></script>
   </head>
   <body>
@@ -22,23 +23,27 @@
 
     <div id="status">Status: Ready</div>
 
-    <div id="edgeDirection" style="display: none">
-      <label
-        ><input type="radio" name="direction" value="any" checked />
-        Undirected</label
-      >
-      <label><input type="radio" name="direction" value="from" /> From</label>
-      <label><input type="radio" name="direction" value="to" /> To</label>
+    <div>
+      <radio-button-group id="edgeDirection" style="display: none">
+        <label
+          ><input type="radio" name="direction" value="any" checked />
+          Undirected</label
+        >
+        <label><input type="radio" name="direction" value="from" /> From</label>
+        <label><input type="radio" name="direction" value="to" /> To</label>
+      </radio-button-group>
     </div>
 
-    <button id="calculateRoute">Calculate</button>
-    <label for="iterationCount">Iteration Count</label>
-    <input
-      type="number"
-      value="100000"
-      placeholder="Iteration Count"
-      id="iterationCount"
-    />
+    <div>
+      <button id="calculateRoute">Calculate</button>
+      <label for="iterationCount">Iteration Count</label>
+      <input
+        type="number"
+        value="100000"
+        placeholder="Iteration Count"
+        id="iterationCount"
+      />
+    </div>
 
     <div>
       <label for="meter1">Worker 1</label>

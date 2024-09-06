@@ -39,12 +39,10 @@ export class GraphHandler {
       .addEventListener("click", () => this.setMode(EDGE_MODE));
 
     // Set up edge direction controls
-    document.querySelectorAll('input[name="direction"]').forEach((radio) => {
-      radio.addEventListener("change", (event) => {
-        this.currentDirection = event.target.value;
-        this.updateStatus(`Edge direction set to ${this.currentDirection}`);
-      });
-    });
+    document.getElementById("edgeDirection").onChange = (event) => {
+      this.currentDirection = event.detail.value;
+      this.updateStatus(`Edge direction set to ${this.currentDirection}`);
+    };
 
     // Set up status display
     this.statusElement = document.getElementById("status");
