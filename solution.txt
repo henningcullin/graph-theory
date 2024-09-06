@@ -1,0 +1,62 @@
+The Chinese Postman Problem (CPP) for a directed graph (digraph), also called the Directed Chinese Postman Problem (DCPP), seeks to find the shortest route that visits every edge at least once. In your case, the modification is that you want to start at a specific vertex a and end at a specific vertex b, rather than returning to the starting point.
+
+Here's a step-by-step explanation of how to approach the Directed Chinese Postman Problem (DCPP) for a digraph, given that you've already calculated incoming and outgoing degrees and completed flood-filling to check graph connectivity.
+Step-by-Step Approach:
+
+    Check Graph Feasibility:
+        Verify that the graph is strongly connected. This means there must be a directed path from any vertex to any other vertex. Since you already performed a flood-fill, you should have confirmed that all vertices are reachable (if not, the problem becomes infeasible).
+        For the standard Chinese Postman Problem, the incoming and outgoing degrees for every vertex must be balanced. However, since you're not returning to the starting vertex, we don't need all vertices to have balanced degrees.
+
+    Identify Unbalanced Vertices:
+        For each vertex v, compare the out-degree (number of outgoing edges) with the in-degree (number of incoming edges). Let:
+            d_out(v) be the number of edges leaving v.
+            d_in(v) be the number of edges entering v.
+        A vertex is unbalanced if d_out(v) ≠ d_in(v). You will use these unbalanced vertices to correct the flow and ensure that a valid Eulerian path (which visits every edge) can be found.
+        For an Eulerian path to exist (one that does not return to the start), the following must hold:
+            The start vertex a should have one more outgoing edge than incoming edges (d_out(a) = d_in(a) + 1).
+            The end vertex b should have one more incoming edge than outgoing edges (d_in(b) = d_out(b) + 1).
+            All other vertices should have equal in-degree and out-degree (d_in(v) = d_out(v) for v ≠ a, b).
+
+    Add Augmented Edges:
+        If the in-degrees and out-degrees do not satisfy the conditions above (i.e., the graph is not Eulerian with respect to vertices a and b), then you need to add virtual edges to balance the graph.
+        For any vertex where d_out(v) > d_in(v), add virtual incoming edges from vertices with excess incoming edges (where d_in(v) > d_out(v)). The goal is to make the graph Eulerian by introducing the minimal number of edges.
+        To determine the minimal additional edges, solve a minimum cost flow problem where you add the fewest edges to make the in-degree equal to the out-degree for all vertices except a and b. Use Dijkstra’s algorithm or another shortest-path algorithm to find the minimum-cost path between vertices that need balancing.
+
+    Construct Eulerian Path:
+        Now that the graph is Eulerian (i.e., it has equal in-degree and out-degree for all vertices except a and b), you can construct the Eulerian path. The Eulerian path is a path that visits every edge exactly once, including the virtual edges you added.
+        Use Hierholzer’s Algorithm to construct the Eulerian path:
+            Start at the vertex a (your specified starting vertex).
+            While there are unvisited edges, follow edges from the current vertex, marking them as traveled.
+            If you get stuck (i.e., no more unvisited edges from the current vertex), backtrack to any previously visited vertex that still has unvisited edges and continue.
+            Continue this process until you've visited all edges exactly once.
+
+    Remove Virtual Edges:
+        The Eulerian path you constructed may include some of the virtual edges added earlier. These edges were only added to balance the graph, so they need to be removed from the final solution.
+        For every virtual edge in your Eulerian path, replace it with the real shortest path that corresponds to that virtual edge. This step ensures that the final path uses only real edges from the original graph, while still satisfying the Chinese Postman Problem.
+
+    Output the Eulerian Path:
+        The final result will be an ordered list of all edges in the order they are traveled in the Eulerian path, starting at vertex a and ending at vertex b. This path will traverse every edge in the digraph at least once, and possibly more than once, to account for any necessary virtual edges that were added to balance the graph.
+
+Example:
+
+Suppose you have the following digraph:
+
+    Vertices: a, b, c
+    Directed edges: (a, b), (b, c), (c, a), (b, a)
+
+Step-by-step for this example:
+
+    Check degrees:
+        a: out-degree = 1, in-degree = 1
+        b: out-degree = 2, in-degree = 2
+        c: out-degree = 1, in-degree = 1
+
+Since all vertices already have balanced in-degrees and out-degrees, the graph is already Eulerian.
+
+    Construct the Eulerian path:
+        Start at vertex a.
+        Possible Eulerian path: a -> b -> a -> c -> b -> c -> a.
+
+If the graph were not Eulerian, you would have added virtual edges between unbalanced vertices and repeated the steps as described.
+
+By following this process, you can solve the directed Chinese Postman Problem for any digraph, even if you want to specify a starting and ending vertex.
