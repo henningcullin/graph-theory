@@ -39,7 +39,7 @@ export class Graph {
    * @param {Direction} [direction='any'] - The direction of the edge.
    */
   addEdge(vertex1, vertex2, direction = "any") {
-    const edge = new Edge(vertex1, vertex2, direction);
+    const edge = new Edge(vertex1, vertex2, direction, this.edges.length + 1);
     this.edges.push(edge);
   }
 

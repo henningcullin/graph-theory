@@ -1,3 +1,6 @@
+import { Edge } from "./Edge.js";
+import { Vertex } from "./Vertex.js";
+
 /**
  * Represents a popup dialog.
  */
