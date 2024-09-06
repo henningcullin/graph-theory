@@ -1,5 +1,5 @@
-import { GraphHandler } from "../graph/GraphHandler.js";
-import { domLoaded } from "../graph/utils.js";
+import { GraphHandler } from "./graph/GraphHandler.js";
+import { domLoaded } from "./graph/utils.js";
 
 await domLoaded();
 
