@@ -34,6 +34,12 @@ export class GraphHandler {
     /** @type {import('./Edge.js').Direction} */
     this.currentDirection = "any"; // Default direction for edges
 
+    this.currentMousePosition = null;
+
+    this.canvas.addEventListener("mousemove", (event) =>
+      this.handleMouseMove(event)
+    );
+
     // Set up control panel buttons
     document
       ?.getElementById("vertexModeBtn")
@@ -67,7 +73,7 @@ export class GraphHandler {
 
     this.canvas.addEventListener("click", (event) => this.handleClick(event));
     this.updateStatus("Ready");
-    this.graph.draw();
+    this.animate();
   }
 
   /**
@@ -131,7 +137,7 @@ export class GraphHandler {
       if (vertex && vertex !== this.firstVertex) {
         this.graph.addEdge(this.firstVertex, vertex, this.currentDirection);
         this.firstVertex = null;
-        this.graph.draw();
+        this.currentMousePosition = null; // Reset mouse position
         this.updateStatus("Edge created. Ready.");
       }
     } else {
@@ -217,6 +223,80 @@ export class GraphHandler {
   updateStatus(message) {
     if (this.statusElement) {
       this.statusElement.textContent = `Status: ${message}`;
+    }
+  }
+
+  /**
+   *
+   * @param {MouseEvent} event
+   */
+  handleMouseMove(event) {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    this.currentMousePosition = { x, y };
+  }
+
+  animate() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.graph.draw();
+
+    if (this.firstVertex && this.currentMousePosition) {
+      // Draw edge from first vertex to current mouse position
+      this.drawTemporaryEdge(this.firstVertex, this.currentMousePosition);
+    }
+
+    requestAnimationFrame(() => this.animate());
+  }
+
+  /**
+   *
+   * @param {Vertex} vertex
+   * @param {{x: number, y: number}} mousePosition
+   */
+  drawTemporaryEdge(vertex, mousePosition) {
+    // Draw the edge line
+    this.ctx.beginPath();
+    this.ctx.moveTo(vertex.x, vertex.y);
+    this.ctx.lineTo(mousePosition.x, mousePosition.y);
+    this.ctx.strokeStyle = this.currentDirection === "any" ? "black" : "red"; // Same styling for completed edges
+    this.ctx.setLineDash([5, 5]); // Dashed line for the temporary edge
+    this.ctx.stroke();
+    this.ctx.setLineDash([]); // Reset dash style
+
+    if (this.currentDirection !== "any") {
+      // Draw arrowhead
+      let fromVertex, toVertex;
+      if (this.currentDirection === "from") {
+        fromVertex = vertex;
+        toVertex = mousePosition;
+      } else if (this.currentDirection === "to") {
+        fromVertex = mousePosition;
+        toVertex = vertex;
+      } else return;
+
+      let midX = (fromVertex.x + toVertex.x) / 2;
+      let midY = (fromVertex.y + toVertex.y) / 2;
+      let dx = toVertex.x - fromVertex.x;
+      let dy = toVertex.y - fromVertex.y;
+      let angle = Math.atan2(dy, dx);
+
+      let arrowSize = 10;
+
+      this.ctx.beginPath();
+      this.ctx.moveTo(midX, midY);
+      this.ctx.lineTo(
+        midX - arrowSize * Math.cos(angle - Math.PI / 6),
+        midY - arrowSize * Math.sin(angle - Math.PI / 6)
+      );
+      this.ctx.lineTo(
+        midX - arrowSize * Math.cos(angle + Math.PI / 6),
+        midY - arrowSize * Math.sin(angle + Math.PI / 6)
+      );
+      this.ctx.lineTo(midX, midY);
+      this.ctx.fillStyle = "red"; // Same color as the arrow for completed edges
+      this.ctx.fill();
     }
   }
 }
