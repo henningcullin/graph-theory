@@ -86,7 +86,9 @@ function build_eulerian_graph(startVertex, endVertex, graphHandler) {
   const { surplus, deficit } = compute_surplus_deficit(
     inDegree,
     outDegree,
-    vertexMap
+    vertexMap,
+    startVertex,
+    endVertex
   );
 
   const balancingEdges = compute_balancing_edges(surplus, deficit);
@@ -94,15 +96,20 @@ function build_eulerian_graph(startVertex, endVertex, graphHandler) {
   balancingEdges.forEach(({ vertex1, vertex2, direction, shadowId }) => {
     graphHandler.graph.addEdge(vertex1, vertex2, direction, shadowId);
   });
+
+  const afterBalancing = compute_degress(graphHandler.graph.vertices);
+
+  console.log("After balancing");
+  console.log("inDegree", afterBalancing.inDegree);
+  console.log("outDegree", afterBalancing.outDegree);
 }
 
 /**
  *
  * @param {Vertex[]} vertices
- * @param {number[]} idFilter
  * @returns {{inDegree: Map<number, number>, outDegree: Map<number, number>}}
  */
-function compute_degress(vertices, idFilter = []) {
+function compute_degress(vertices) {
   // Maps to store in-degrees and out-degrees per vertexId
   const inDegree = new Map();
   const outDegree = new Map();
@@ -147,9 +154,17 @@ function compute_degress(vertices, idFilter = []) {
  * @param {Map<number, number>} inDegree
  * @param {Map<number, number>} outDegree
  * @param {Map<number, Vertex>} vertexMap
+ * @param {Vertex} startVertex
+ * @param {Vertex} endVertex
  * @returns {{surplus: Vertex[], deficit: Vertex[]}}
  */
-function compute_surplus_deficit(inDegree, outDegree, vertexMap) {
+function compute_surplus_deficit(
+  inDegree,
+  outDegree,
+  vertexMap,
+  startVertex,
+  endVertex
+) {
   const unBalanced = compute_unbalanced(inDegree, outDegree);
 
   /**
@@ -160,6 +175,36 @@ function compute_surplus_deficit(inDegree, outDegree, vertexMap) {
    * @type {Vertex[]}
    */
   const deficit = [];
+
+  unBalanced.forEach(([vertexId, degreeInbalance], index) => {
+    if (vertexId === startVertex.id) {
+      if (degreeInbalance === 1) {
+      } else if (degreeInbalance > 1) {
+        for (let i = 0; i < 1 * degreeInbalance - 1; i++) {
+          surplus.push(startVertex);
+        }
+      } else {
+        for (let i = 0; i < 1 * -(degreeInbalance - 1); i++) {
+          surplus.push(startVertex);
+        }
+      }
+      unBalanced.splice(index, 1);
+    } else if (vertexId === endVertex.id) {
+      // Make endvertex have deficit one 1
+      if (degreeInbalance === -1) {
+        // If already deficit of 1, do nothing
+      } else if (degreeInbalance < 1) {
+        for (let i = 0; i < 1 * -(degreeInbalance + 1); i++) {
+          deficit.unshift(endVertex);
+        }
+      } else {
+        for (let i = 0; i < 1 * (degreeInbalance + 1); i++) {
+          deficit.unshift(endVertex);
+        }
+      }
+      unBalanced.splice(index, 1);
+    }
+  });
 
   unBalanced.forEach(([vertexId, degreeInbalance]) => {
     if (degreeInbalance > 0) {
@@ -172,6 +217,18 @@ function compute_surplus_deficit(inDegree, outDegree, vertexMap) {
       }
     } else unreachable();
   });
+
+  if (
+    unBalanced.findIndex(([vertexId]) => vertexId === startVertex.id) === -1
+  ) {
+    surplus.push(startVertex);
+    // If start vertex is balanced, add to surplus to make 1 extra out
+  }
+  if (unBalanced.findIndex(([vertexId]) => vertexId === endVertex.id) === -1) {
+    // If end vertex is balanced add to deficit to make 1 extra in
+    deficit.unshift(endVertex);
+  }
+
   return { surplus, deficit };
 }
 
@@ -250,6 +307,8 @@ function correct_balancing_edges(balancingPaths) {
       currentVertex = oppositeVertex;
     });
   }
+
+  console.log(correctingEdges);
 
   return correctingEdges;
 }
