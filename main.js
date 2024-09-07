@@ -48,6 +48,8 @@ document.getElementById("calculateRoute")?.addEventListener("click", () => {
     : "";
 });
 
+const pathWeight = (path) => path.reduce((acc, curr) => acc + curr.weight, 0);
+
 /**
  *
  * @param {Vertex} startVertex
@@ -58,13 +60,15 @@ function solve_chinese_postman_problem(startVertex, endVertex, graphHandler) {
   try {
     build_eulerian_graph(startVertex, endVertex, graphHandler);
 
-    const shortestPath = follow_eulerian_path(
+    const shortestPaths = follow_eulerian_path(
       startVertex,
       endVertex,
       graphHandler.graph.edges
     );
 
-    console.log(shortestPath);
+    shortestPaths.sort((a, b) => pathWeight(a) - pathWeight(b));
+
+    console.log(shortestPaths);
   } catch (error) {
     console.error(error);
   }
@@ -337,7 +341,7 @@ function correct_final_edges(bestPairings) {
         edge.vertex1.id === currentVertex.id ? edge.vertex2 : edge.vertex1;
 
       correctingEdges.push({
-        direction: "from",
+        direction: edge.direction,
         shadowId: edge.id,
         vertex1: currentVertex,
         vertex2: oppositeVertex,
