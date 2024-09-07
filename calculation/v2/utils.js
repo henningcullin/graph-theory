@@ -30,3 +30,11 @@ export function unwrap(possiblyUndefined) {
     return possiblyUndefined;
   }
 }
+
+/**
+ * Throws an error when unreachable code is reached
+ * @throws {Error}
+ */
+export function unreachable() {
+  throw new Error("Unreachable code reached");
+}

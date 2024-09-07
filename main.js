@@ -5,10 +5,12 @@ import {
   sp_dijkstra_v1,
 } from "./calculation/v1/WorkerScripts.js";
 import { get_flood_filled } from "./calculation/v2/flood_fill.js";
-import { canTravel, unwrap } from "./calculation/v2/utils.js";
+import { canTravel, unreachable, unwrap } from "./calculation/v2/utils.js";
+import { Edge } from "./graph/Edge.js";
 import { GraphHandler } from "./graph/GraphHandler.js";
 import { domLoaded } from "./graph/utils.js";
 import { Vertex } from "./graph/Vertex.js";
+import { dijkstra } from "./v2/dijkstra.js";
 
 await domLoaded();
 
@@ -30,7 +32,7 @@ document.getElementById("calculateRoute")?.addEventListener("click", () => {
   if (!(startVertex instanceof Vertex) || !(endVertex instanceof Vertex))
     return console.error("start or end vertex was undefined");
 
-  solve_chinese_postman_problem(startVertex, endVertex);
+  solve_chinese_postman_problem(startVertex, endVertex, graphHandler);
 
   const methods = {
     "ccp-dijkstra-1": () => ccp_dijkstra_v1(startVertex, endVertex, edges),
@@ -41,18 +43,22 @@ document.getElementById("calculateRoute")?.addEventListener("click", () => {
 
   const methodGroup = document.getElementById("calculationMethod");
 
-  // @ts-ignore
-  const method = methodGroup?.hasAttribute("value") ? methodGroup?.value : "";
+  const method = methodGroup?.hasAttribute("value")
+    ? methodGroup.getAttribute("value") ?? ""
+    : "";
 });
 
 /**
  *
  * @param {Vertex} startVertex
  * @param {Vertex} endVertex
+ * @param {GraphHandler} graphHandler
  */
-function solve_chinese_postman_problem(startVertex, endVertex) {
+function solve_chinese_postman_problem(startVertex, endVertex, graphHandler) {
   try {
-    const eulearianGraph = build_eulerian_graph(startVertex, endVertex);
+    build_eulerian_graph(startVertex, endVertex, graphHandler);
+
+    console.log(graphHandler);
   } catch (error) {
     console.error(error);
   }
@@ -62,8 +68,9 @@ function solve_chinese_postman_problem(startVertex, endVertex) {
  *
  * @param {Vertex} startVertex
  * @param {Vertex} endVertex
+ * @param {GraphHandler} graphHandler
  */
-function build_eulerian_graph(startVertex, endVertex) {
+function build_eulerian_graph(startVertex, endVertex, graphHandler) {
   const [vertexMap, edgeMap] = get_flood_filled(startVertex, endVertex);
 
   if (vertexMap.size < 2 || edgeMap.size < 1)
@@ -76,22 +83,17 @@ function build_eulerian_graph(startVertex, endVertex) {
   console.log("inDegree", inDegree);
   console.log("outDegree", outDegree);
 
-  /**
-   * Array of all unbalanced verticies
-   * The first first element is the vertexId
-   * The second element is the difference in degress from inDegrees-outDegrees
-   * @type {number[][]}
-   */
-  const unBalanced = Array.from(inDegree.entries())
-    .map(([vertexId, inDegrees]) => {
-      const diffDegrees = inDegrees - unwrap(outDegree.get(vertexId));
-      if (diffDegrees !== 0) {
-        return [vertexId, diffDegrees];
-      }
-    })
-    .filter((item) => typeof item !== "undefined");
+  const { surplus, deficit } = compute_surplus_deficit(
+    inDegree,
+    outDegree,
+    vertexMap
+  );
 
-  console.log(unBalanced);
+  const balancingEdges = compute_balancing_edges(surplus, deficit);
+
+  balancingEdges.forEach(({ vertex1, vertex2, direction, shadowId }) => {
+    graphHandler.graph.addEdge(vertex1, vertex2, direction, shadowId);
+  });
 }
 
 /**
@@ -138,4 +140,116 @@ function compute_degress(vertices, idFilter = []) {
   });
 
   return { inDegree, outDegree };
+}
+
+/**
+ *
+ * @param {Map<number, number>} inDegree
+ * @param {Map<number, number>} outDegree
+ * @param {Map<number, Vertex>} vertexMap
+ * @returns {{surplus: Vertex[], deficit: Vertex[]}}
+ */
+function compute_surplus_deficit(inDegree, outDegree, vertexMap) {
+  const unBalanced = compute_unbalanced(inDegree, outDegree);
+
+  /**
+   * @type {Vertex[]}
+   */
+  const surplus = [];
+  /**
+   * @type {Vertex[]}
+   */
+  const deficit = [];
+
+  unBalanced.forEach(([vertexId, degreeInbalance]) => {
+    if (degreeInbalance > 0) {
+      for (let i = 0; i < 1 * degreeInbalance; i++) {
+        surplus.push(unwrap(vertexMap.get(vertexId)));
+      }
+    } else if (degreeInbalance < 0) {
+      for (let i = 0; i < 1 * -degreeInbalance; i++) {
+        deficit.push(unwrap(vertexMap.get(vertexId)));
+      }
+    } else unreachable();
+  });
+  return { surplus, deficit };
+}
+
+/**
+ *
+ * @param {Map<number, number>} inDegree
+ * @param {Map<number, number>} outDegree
+ * @returns {number[][]} Array of all verticies with non 0 diff
+ *
+ * The first first element is the vertexId
+ *
+ * The second element is the difference in degress from inDegree-outDegree
+ */
+function compute_unbalanced(inDegree, outDegree) {
+  return Array.from(inDegree.entries())
+    .map(([vertexId, inDegree]) => {
+      const diffDegrees = inDegree - unwrap(outDegree.get(vertexId));
+      if (diffDegrees !== 0) {
+        return [vertexId, diffDegrees];
+      }
+    })
+    .filter((item) => typeof item !== "undefined");
+}
+
+/**
+ *
+ * @param {Vertex[]} surplus
+ * @param {Vertex[]} deficit
+ */
+function compute_balancing_edges(surplus, deficit) {
+  /**
+   * @type {{path: Edge[], weight: number, startVertex: Vertex}[]}
+   */
+  const balancingPaths = [];
+
+  // Iterate through surplus and deficit vertices and add virtual edges
+  while (surplus.length && deficit.length) {
+    const surplusVertex = unwrap(surplus.pop()); // Take a surplus vertex
+    const deficitVertex = unwrap(deficit.pop()); // Take a deficit vertex
+
+    const path = dijkstra(surplusVertex, deficitVertex);
+
+    const balanceItem = { ...unwrap(path), startVertex: surplusVertex };
+
+    balancingPaths.push(balanceItem);
+  }
+
+  return correct_balancing_edges(balancingPaths);
+}
+
+/**
+ * @param {{path: Edge[], weight: number, startVertex: Vertex}[]} balancingPaths
+ */
+function correct_balancing_edges(balancingPaths) {
+  /**
+   * @type {{direction: import('./graph/Edge.js').Direction, shadowId: number, vertex1: Vertex, vertex2: Vertex}[]}
+   */
+  const correctingEdges = [];
+
+  for (const pathObject of balancingPaths) {
+    const { path, startVertex } = pathObject;
+
+    let currentVertex = startVertex;
+
+    path.forEach((edge) => {
+      const oppositeVertex =
+        edge.vertex1.id === currentVertex.id ? edge.vertex2 : edge.vertex1;
+
+      correctingEdges.push({
+        direction: "from",
+        shadowId: edge.id,
+        vertex1: currentVertex,
+        vertex2: oppositeVertex,
+      });
+
+      currentVertex = oppositeVertex;
+    });
+  }
+
+  return correctingEdges;
 }

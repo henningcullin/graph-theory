@@ -40,9 +40,16 @@ export class Graph {
    * @param {Vertex} vertex1 - The starting vertex of the edge.
    * @param {Vertex} vertex2 - The ending vertex of the edge.
    * @param {import('./Edge.js').Direction} [direction='any'] - The direction of the edge.
+   * @param {number | null} [shadowId=null] - The id of the source edge
    */
-  addEdge(vertex1, vertex2, direction = "any") {
-    const edge = new Edge(vertex1, vertex2, direction, this.edges.length + 1);
+  addEdge(vertex1, vertex2, direction = "any", shadowId = null) {
+    const edge = new Edge(
+      vertex1,
+      vertex2,
+      direction,
+      this.edges.length + 1,
+      shadowId
+    );
     this.edges.push(edge);
   }
 
