@@ -59,6 +59,9 @@ export class GraphHandler {
         document?.getElementById("edgeDirection")
       )
     );
+
+    edgeDirectionGroup.value = "any";
+
     /**
      *
      * @param {*} event
