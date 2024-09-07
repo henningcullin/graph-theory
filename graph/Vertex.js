@@ -27,6 +27,7 @@ export class Vertex {
   draw(ctx) {
     ctx.beginPath();
     ctx.arc(this.x, this.y, 20, 0, 2 * Math.PI);
+    ctx.strokeStyle = "black";
     ctx.fillStyle = "lightblue";
     ctx.fill();
     ctx.stroke();
