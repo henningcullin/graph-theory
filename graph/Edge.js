@@ -51,13 +51,27 @@ export class Edge {
   }
 
   /**
+   * @returns {boolean}
+   */
+  isShadow() {
+    return typeof this.shadowId === "number";
+  }
+
+  /**
    * Draws the edge on the canvas.
    * @param {CanvasRenderingContext2D} ctx - The 2D rendering context of the canvas.
    */
   draw(ctx) {
     ctx.beginPath();
-    ctx.moveTo(this.vertex1.x, this.vertex1.y);
-    ctx.lineTo(this.vertex2.x, this.vertex2.y);
+
+    if (this.isShadow()) {
+      ctx.moveTo(this.vertex1.x + 10, this.vertex1.y + 10);
+      ctx.lineTo(this.vertex2.x + 10, this.vertex2.y + 10);
+    } else {
+      ctx.moveTo(this.vertex1.x, this.vertex1.y);
+      ctx.lineTo(this.vertex2.x, this.vertex2.y);
+    }
+
     ctx.strokeStyle = this.isDirected() ? "red" : "black";
     ctx.stroke();
 
@@ -81,6 +95,11 @@ export class Edge {
 
       // Arrowhead size
       let arrowSize = 10;
+
+      if (this.isShadow()) {
+        midX += 10;
+        midY += 10;
+      }
 
       ctx.beginPath();
       ctx.moveTo(midX, midY);
