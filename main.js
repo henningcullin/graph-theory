@@ -47,7 +47,11 @@ document.getElementById("calculateRoute")?.addEventListener("click", () => {
     ? methodGroup.getAttribute("value") ?? ""
     : "";
 });
-
+/**
+ *
+ * @param {Edge[]} path
+ * @returns {number}
+ */
 const pathWeight = (path) => path.reduce((acc, curr) => acc + curr.weight, 0);
 
 /**
@@ -66,9 +70,13 @@ function solve_chinese_postman_problem(startVertex, endVertex, graphHandler) {
       graphHandler.graph.edges
     );
 
-    shortestPaths.sort((a, b) => pathWeight(a) - pathWeight(b));
+    const pathsWithWeight = shortestPaths.map((path) => {
+      return { path: path, weight: pathWeight(path) };
+    });
 
-    console.log(shortestPaths);
+    pathsWithWeight.sort((a, b) => a.weight - b.weight);
+
+    console.log(pathsWithWeight);
   } catch (error) {
     console.error(error);
   }
@@ -295,8 +303,17 @@ function compute_final_edges(degrees, vertexMap) {
  * @returns {[Vertex, Vertex][][]} - Array of possible pairings.
  */
 function generatePairings(vertices) {
+  /**
+   * @type {[Vertex, Vertex][][]}
+   */
   const pairings = [];
 
+  /**
+   *
+   * @param {[Vertex, Vertex][]} pairs
+   * @param {Vertex[]} remaining
+   * @returns
+   */
   function backtrack(pairs, remaining) {
     if (remaining.length === 0) {
       pairings.push([...pairs]);
