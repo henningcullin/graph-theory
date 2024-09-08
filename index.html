@@ -9,12 +9,7 @@
     <script type="module" src="./main.js" defer></script>
   </head>
   <body>
-    <canvas
-      id="graphCanvas"
-      width="4096"
-      height="4096"
-      style="border: 1px solid #000000"
-    ></canvas>
+    <canvas id="graphCanvas" style="border: 1px solid #000000"></canvas>
 
     <div id="controls">
       <button id="vertexModeBtn">Vertex Mode</button>
@@ -68,6 +63,11 @@
           ><input type="radio" value="sp-dijkstra-1" />[SP] Dijkstra V1</label
         >
       </radio-button-group>
+    </div>
+
+    <div>
+      <label for="backgroundImage">Chose background image</label>
+      <input type="file" id="backgroundImage" accept="image/*" />
     </div>
 
     <div>

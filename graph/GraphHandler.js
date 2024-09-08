@@ -39,6 +39,34 @@ export class GraphHandler {
     this.canvas.addEventListener("mousemove", (event) =>
       this.handleMouseMove(event)
     );
+    /**
+     * @type {HTMLImageElement}
+     */
+    this.background = new Image();
+
+    /**
+     *
+     * @param {Event} event
+     * @returns
+     */
+    const onFileChange = (event) => {
+      // @ts-ignore
+      const file = event?.target?.files[0];
+      if (!file) {
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        // @ts-ignore
+        this.background.src = e?.target?.result; // Image is loaded from file
+      };
+      reader.readAsDataURL(file); // Read file as a DataURL
+    };
+
+    document
+      .getElementById("backgroundImage")
+      ?.addEventListener("change", onFileChange);
 
     // Set up control panel buttons
     document
@@ -243,6 +271,16 @@ export class GraphHandler {
 
   animate() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Get image's natural width and height
+    const imgWidth = this.background.naturalWidth || 1280;
+    const imgHeight = this.background.naturalHeight || 720;
+
+    // Resize the canvas to match the image size
+    this.canvas.width = imgWidth;
+    this.canvas.height = imgHeight;
+
+    this.ctx.drawImage(this.background, 0, 0, imgWidth, imgHeight);
     this.graph.draw();
 
     if (this.firstVertex && this.currentMousePosition) {

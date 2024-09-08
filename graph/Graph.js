@@ -57,7 +57,6 @@ export class Graph {
    * Draws the graph on the canvas.
    */
   draw() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.edges.forEach((edge) => edge.draw(this.ctx));
     this.vertices.forEach((vertex) => vertex.draw(this.ctx));
   }
