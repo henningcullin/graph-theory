@@ -213,6 +213,36 @@ function build_eulerian_graph(startVertex, endVertex, graphHandler) {
   finalEdges.forEach(({ vertex1, vertex2, direction, shadowId }) => {
     graphHandler.graph.addEdge(vertex1, vertex2, direction, shadowId);
   });
+
+  const finalDegrees = compute_in_out_degrees(graphHandler.graph.vertices);
+
+  /**
+   *
+   * @param {number} number
+   * @returns {boolean}
+   */
+  const isEven = (number) => number % 2 === 0;
+
+  const isEulerian = graphHandler.graph.vertices.every(function (vertex) {
+    const inDegrees = unwrap(finalDegrees.inDegrees.get(vertex.id));
+    const outDegrees = unwrap(finalDegrees.outDegrees.get(vertex.id));
+    if (vertex.id === startVertex.id && outDegrees - inDegrees === 1)
+      return true;
+    else if (vertex.id === endVertex.id && inDegrees - outDegrees === 1)
+      return true;
+    else if (inDegrees === outDegrees && isEven(inDegrees)) return true;
+    else {
+      console.log("Was not eulerian");
+      console.log("indeg", inDegrees);
+      console.log("outdeg", outDegrees);
+      console.log("vertex", vertex);
+      console.log("starvertex", startVertex);
+      console.log("endvertex", endVertex);
+    }
+  });
+
+  console.log("Is eulerian: ", isEulerian);
+  console.log("Final deegs", finalDegrees);
 }
 
 /**
@@ -387,6 +417,22 @@ function compute_in_out_degrees(vertices) {
     outDegrees.set(v.id, 0);
   });
 
+  vertices.forEach((vertex) => {
+    const inDegree = () => inDegrees.get(vertex.id);
+    const outDegree = () => outDegrees.get(vertex.id);
+
+    if (inDegree() - outDegree() !== 0) {
+      vertex.edges.forEach((edge) => {
+        if (edge.isDirected()) return;
+        if (inDegree() > outDegree()) {
+          outDegrees.set(vertex.id, outDegree() + 1);
+        } else if (outDegree() > inDegree()) {
+          inDegrees.set(vertex.id, inDegree() + 1);
+        }
+      });
+    }
+  });
+
   // Compute in-degrees and out-degrees
   vertices.forEach((vertex) => {
     vertex.edges.forEach((edge) => {
@@ -402,22 +448,6 @@ function compute_in_out_degrees(vertices) {
         inDegrees.set(vertex.id, inDegrees.get(vertex.id) + 1);
       }
     });
-  });
-
-  vertices.forEach((vertex) => {
-    const inDegree = inDegrees.get(vertex.id);
-    const outDegree = outDegrees.get(vertex.id);
-
-    if (inDegree - outDegree !== 0) {
-      vertex.edges.forEach((edge) => {
-        if (edge.isDirected()) return;
-        if (inDegrees.get(vertex.id) > outDegrees.get(vertex.id)) {
-          outDegrees.set(vertex.id, outDegrees.get(vertex.id) + 1);
-        } else if (outDegrees.get(vertex.id) > inDegrees.get(vertex.id)) {
-          inDegrees.set(vertex.id, inDegrees.get(vertex.id) + 1);
-        }
-      });
-    }
   });
 
   return { inDegrees, outDegrees };
