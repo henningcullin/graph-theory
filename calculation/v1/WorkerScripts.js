@@ -82,6 +82,7 @@ export function ccp_brute_v1(startVertex, endVertex, edges) {
       edges,
       iterations: iterationsPerWorker,
     });
+    console.log("Worker ", i + 1, " started");
   }
 }
 
