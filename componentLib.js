@@ -66,6 +66,9 @@ class RadioButtonGroup extends HTMLElement {
       throw new Error("Value must be a string");
     }
 
+    // Reflect the value to the DOM attribute
+    this.setAttribute("value", newValue);
+
     this._value = newValue;
     this.updateSelectedRadioButton(newValue);
     this.dispatchChange(newValue);
