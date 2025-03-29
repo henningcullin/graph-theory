@@ -46,7 +46,7 @@ const getOptions = (vertex) =>
  * @param {Vertex} endVertex
  * @returns
  */
-export function dijkstra(startVertex, endVertex) {
+export function dijkstra(startVertex, endVertex, ignoreDirection = false) {
   /**
    * @type {Map<number, number>}
    */
@@ -71,7 +71,9 @@ export function dijkstra(startVertex, endVertex) {
     }
 
     // Explore neighbors
-    const options = getOptions(currentVertex);
+    const options = ignoreDirection
+      ? currentVertex.edges
+      : getOptions(currentVertex);
     options.forEach((edge) => {
       const neighbor =
         edge.vertex1.id !== currentVertex.id ? edge.vertex1 : edge.vertex2;
