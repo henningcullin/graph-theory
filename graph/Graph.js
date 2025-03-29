@@ -36,6 +36,24 @@ export class Graph {
   }
 
   /**
+   * @param {number} edgeId
+   * @param {boolean} directional
+   */
+  cloneEdge(edgeId, directional = true) {
+    const targetEdge = unwrap(this.edges.find((edge) => edge.id === edgeId));
+
+    const clonedEdge = new Edge(
+      targetEdge?.vertex1,
+      targetEdge?.vertex2,
+      directional ? targetEdge?.direction : "any",
+      this.edges.length + 1,
+      targetEdge.id
+    );
+
+    this.edges.push(clonedEdge);
+  }
+
+  /**
    * Adds an edge between two vertices.
    * @param {Vertex} vertex1 - The starting vertex of the edge.
    * @param {Vertex} vertex2 - The ending vertex of the edge.
