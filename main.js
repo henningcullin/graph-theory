@@ -30,20 +30,25 @@ document.getElementById("calculateRoute")?.addEventListener("click", () => {
   if (!(startVertex instanceof Vertex) || !(endVertex instanceof Vertex))
     return console.error("start or end vertex was undefined");
 
-  //solve_chinese_postman_problem(startVertex, endVertex, graphHandler);
+  solve_chinese_postman_problem(startVertex, endVertex, graphHandler);
 
-  solve_mccp(startVertex, endVertex, graphHandler);
+  //solve_mccp(startVertex, endVertex, graphHandler);
 
-  const methods = {
-    "ccp-dijkstra-1": () => ccp_dijkstra_v1(startVertex, endVertex, edges),
-    "ccp-brute-1": () => ccp_brute_v1(startVertex, endVertex, edges),
-    "ccp-exhaustive-1": () => ccp_exhaustive_v1(startVertex, endVertex, edges),
-    "sp-dijkstra-1": () => sp_dijkstra_v1(startVertex, endVertex, edges),
-  };
+  // const methods = {
+  //   "ccp-dijkstra-1": () => ccp_dijkstra_v1(startVertex, endVertex, edges),
+  //   "ccp-brute-1": () => ccp_brute_v1(startVertex, endVertex, edges),
+  //   "ccp-exhaustive-1": () => ccp_exhaustive_v1(startVertex, endVertex, edges),
+  //   "sp-dijkstra-1": () => sp_dijkstra_v1(startVertex, endVertex, edges),
+  // };
 
-  const methodGroup = document.getElementById("calculationMethod");
+  // const methodGroup = document.getElementById("calculationMethod");
 
-  const method = methodGroup?.hasAttribute("value")
-    ? methodGroup.getAttribute("value") ?? ""
-    : "";
+  // const method = methodGroup?.hasAttribute("value")
+  //   ? methodGroup.getAttribute("value") ?? ""
+  //   : "";
+
+  // if (typeof methods[method] === "function") {
+  //   console.log("calculating using method", method);
+  //   methods[method]();
+  // }
 });
