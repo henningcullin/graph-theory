@@ -341,3 +341,63 @@ export class GraphHandler {
     }
   }
 }
+
+/**
+ * reduce pathObject to coordinate array
+ * @param {*} pathObject
+ * @param {*} startId
+ */
+export function reducePath(pathObject, startId) {
+  /**
+   * @type {null | number}
+   */
+  let currentId = null;
+
+  if (typeof startId !== "number") {
+    console.warn("NO START ID IN REDUCE PATH", pathObject);
+  }
+
+  /**
+   *
+   * @param {*} id
+   * @returns
+   */
+  const isFirst = (id) => id === startId && currentId === null;
+
+  /**
+   *
+   * @param {*} id
+   * @returns
+   */
+  const isNext = (id) => id !== currentId;
+
+  const coordinateArray = pathObject.path.reduce(
+    /** @param {*} acc @param {*} param0 */ (
+      acc,
+      { vertex1: v1, vertex2: v2 }
+    ) => {
+      if (isFirst(v1.id)) {
+        acc.push({ x: v1.x, y: v1.y });
+        acc.push({ x: v2.x, y: v2.y });
+        currentId = v2.id;
+      } else if (isFirst(v2.id)) {
+        acc.push({ x: v2.x, y: v2.y });
+        acc.push({ x: v1.x, y: v1.y });
+        currentId = v1.id;
+      } else {
+        if (isNext(v1.id)) {
+          acc.push({ x: v1.x, y: v1.y });
+          currentId = v1.id;
+        } else {
+          acc.push({ x: v2.x, y: v2.y });
+          currentId = v2.id;
+        }
+      }
+
+      return acc;
+    },
+    []
+  );
+
+  return coordinateArray;
+}
