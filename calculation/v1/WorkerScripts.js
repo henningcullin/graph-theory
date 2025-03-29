@@ -48,7 +48,8 @@ export function ccp_brute_v1(startVertex, endVertex, edges) {
   // Create multiple workers and set up their message handlers
   for (let i = 0; i < NUM_WORKERS; i++) {
     const worker = new Worker(
-      "calculation/v1/chinese-postman-problem/BruteForce-v1.js"
+      "calculation/v1/chinese-postman-problem/BruteForce-v1.js",
+      { type: "module" }
     );
 
     worker.onmessage = function (event) {

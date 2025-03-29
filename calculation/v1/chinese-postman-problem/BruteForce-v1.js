@@ -1,9 +1,15 @@
+import { Edge } from "../../../graph/Edge.js";
+import { Vertex } from "../../../graph/Vertex.js";
+import { unwrap } from "../../v2/utils.js";
+
 /**
  *
  * @param {Edge[]} path
  * @returns {number}
  */
 const pathWeight = (path) => path.reduce((acc, curr) => acc + curr.weight, 0);
+
+let bestPath = Infinity;
 
 /**
  * Handles incoming messages from the main thread
@@ -15,7 +21,9 @@ onmessage = function (event) {
 
   for (let i = 0; i < iterations; i++) {
     const path = traversePath({ startVertex, endVertex, edges });
+    if (!path) continue;
     const weight = pathWeight(path);
+    bestPath = weight;
 
     paths.push({ path, weight });
 
@@ -25,8 +33,6 @@ onmessage = function (event) {
       postMessage({ progress, type: "progress" });
     }
   }
-
-  paths.sort((a, b) => a.weight - b.weight);
 
   // Send the sorted paths back to the main thread
   postMessage({ paths, type: "done" });
@@ -38,9 +44,18 @@ onmessage = function (event) {
  * @returns
  */
 function traversePath({ startVertex, endVertex, edges }) {
+  /**
+   * @type {Edge[]}
+   */
   const traveledEdges = [];
+  let currentWeight = 0;
   let currentVertex = startVertex;
 
+  /**
+   *
+   * @param {Edge} edge
+   * @returns {boolean}
+   */
   const hasTraveled = (edge) =>
     traveledEdges.findIndex(
       (traveled) =>
@@ -54,14 +69,30 @@ function traversePath({ startVertex, endVertex, edges }) {
 
   const routeCompleted = () => allEdgesTraveled() && isEndVertex();
 
+  /**
+   *
+   * @param {Edge} edge
+   * @param {number} vertexId
+   * @returns {boolean}
+   */
   const canTravel = (edge, vertexId) =>
     edge.direction === "any" ||
     (edge.direction === "from" && edge.vertex1.id === vertexId) ||
     (edge.direction === "to" && edge.vertex2.id === vertexId);
 
+  /**
+   *
+   * @param {Vertex} vertex
+   * @returns {Edge[]}
+   */
   const getOptions = (vertex) =>
     vertex.edges.filter((edge) => canTravel(edge, vertex.id));
 
+  /**
+   *
+   * @param {Edge[]} edges
+   * @returns {Edge | undefined}
+   */
   function pickRandomEdge(edges) {
     if (edges.length === 0) return undefined;
     const randomIndex = Math.floor(Math.random() * edges.length);
@@ -69,8 +100,10 @@ function traversePath({ startVertex, endVertex, edges }) {
   }
 
   while (!routeCompleted()) {
+    if (currentWeight > bestPath) return false;
+
     const options = getOptions(currentVertex);
-    const selectedEdge = pickRandomEdge(options);
+    const selectedEdge = unwrap(pickRandomEdge(options));
 
     if (!selectedEdge)
       console.error(
@@ -87,6 +120,7 @@ function traversePath({ startVertex, endVertex, edges }) {
 
     currentVertex = nextVertex;
     traveledEdges.push(selectedEdge);
+    currentWeight += selectedEdge.weight;
   }
 
   return traveledEdges;
